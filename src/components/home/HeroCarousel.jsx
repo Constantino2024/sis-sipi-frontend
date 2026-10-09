@@ -37,7 +37,7 @@ export default function HeroCarousel({ slides }) {
 
   return (
     <section
-      className="relative h-[560px] md:h-[640px] w-full overflow-hidden bg-primary-500 text-white"
+      className="relative h-[560px] md:h-[640px] w-full overflow-hidden bg-slate-100 text-gray-900"
       aria-roledescription="carrossel"
       aria-label="Destaques do SIPI"
       onMouseEnter={() => setPaused(true)}
@@ -56,26 +56,26 @@ export default function HeroCarousel({ slides }) {
         />
       ))}
 
-      {/* Overlay: gradiente leve da direita (transparente) para a esquerda (navy) */}
+      {/* Overlay: gradiente suave em tons claros da direita para a esquerda */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(to left, rgba(10,42,68,0.15) 0%, rgba(10,42,68,0.72) 45%, rgba(10,42,68,0.94) 75%)',
+            'linear-gradient(to right, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.88) 50%, rgba(255,255,255,0.35) 100%)',
         }}
         aria-hidden="true"
       />
 
-      {/* Conteúdo textual, sempre à esquerda */}
+      {/* Conteúdo textual, sempre à esquerda com alto contraste em modo claro */}
       <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
         <div className="max-w-xl" key={slide.id}>
-          <span className="block text-xs font-semibold tracking-[0.2em] uppercase text-secondary-500 mb-4 animate-fadeSlide">
+          <span className="block text-xs font-bold tracking-[0.2em] uppercase text-secondary-600 mb-4 animate-fadeSlide">
             Instituto Angolano da Propriedade Industrial
           </span>
-          <h1 className="text-3xl md:text-5xl font-bold leading-tight animate-fadeSlide">
+          <h1 className="text-3xl md:text-5xl font-bold leading-tight text-gray-900 animate-fadeSlide">
             {slide.titulo}
           </h1>
-          <p className="mt-5 text-base md:text-lg text-primary-100 max-w-md animate-fadeSlide">
+          <p className="mt-5 text-base md:text-lg text-gray-700 max-w-md animate-fadeSlide">
             {slide.descricao}
           </p>
           <div className="mt-8 flex flex-wrap gap-4 animate-fadeSlide">
@@ -87,7 +87,7 @@ export default function HeroCarousel({ slides }) {
             </Link>
             <Link
               to="/consulta"
-              className="border border-white/40 hover:border-white text-white px-6 py-3 font-semibold text-sm transition"
+              className="bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 px-6 py-3 font-semibold text-sm transition shadow-sm"
             >
               Consultar Base (BPI)
             </Link>
@@ -95,7 +95,7 @@ export default function HeroCarousel({ slides }) {
         </div>
       </div>
 
-      {/* Indicadores — quadrados finos, sem border-radius, sem ícones */}
+      {/* Indicadores */}
       <div className="absolute bottom-6 left-4 sm:left-6 lg:left-8 z-10 flex gap-2">
         {slides.map((s, i) => (
           <button
@@ -103,8 +103,8 @@ export default function HeroCarousel({ slides }) {
             onClick={() => goTo(i)}
             aria-label={`Ir para o destaque: ${s.titulo}`}
             aria-current={i === active}
-            className={`h-1 transition-all duration-300 ${
-              i === active ? 'w-10 bg-secondary-500' : 'w-5 bg-white/40 hover:bg-white/70'
+            className={`h-1.5 transition-all duration-300 ${
+              i === active ? 'w-10 bg-primary-600' : 'w-5 bg-gray-400 hover:bg-gray-600'
             }`}
           />
         ))}

@@ -27,78 +27,78 @@ export default function HomePage() {
         {/* ============================================================ */}
         {/* DESTAQUE PRINCIPAL: REGISTO DE MARCAS NO IAPI (LEI N.º 3/92) */}
         {/* ============================================================ */}
-        <section className="py-16 bg-primary-900 text-white border-b-4 border-secondary-500" aria-labelledby="marcas-iapi-titulo">
+        <section className="py-16 bg-slate-50 text-gray-900 border-b-2 border-secondary-500" aria-labelledby="marcas-iapi-titulo">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mb-12">
-              <span className="text-xs font-semibold tracking-[0.25em] uppercase text-secondary-400 block mb-2">
+              <span className="text-xs font-semibold tracking-[0.25em] uppercase text-secondary-700 block mb-2">
                 Instituto Angolano da Propriedade Industrial · IAPI
               </span>
-              <h2 id="marcas-iapi-titulo" className="text-3xl sm:text-4xl font-serif font-bold text-white leading-tight">
+              <h2 id="marcas-iapi-titulo" className="text-3xl sm:text-4xl font-serif font-bold text-primary-900 leading-tight">
                 Registo Oficial de Marcas em Angola
               </h2>
-              <p className="mt-3 text-primary-200 text-sm sm:text-base leading-relaxed">
+              <p className="mt-3 text-gray-600 text-sm sm:text-base leading-relaxed">
                 Proteja a sua marca contra contrafacção e concorrência desleal. O registo no IAPI concede o uso
-                exclusivo em todo o território nacional angolano por um período de <strong>10 anos renováveis</strong>,
+                exclusivo em todo o território nacional angolano por um período de <strong className="text-gray-900">10 anos renováveis</strong>,
                 em total cumprimento da Lei n.º 3/92 da Propriedade Industrial.
               </p>
             </div>
 
             {/* Acesso Rápido em 3 Cartões de Ação */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-14">
-              <div className="bg-primary-800/80 border border-primary-700/60 p-6 rounded-lg flex flex-col justify-between">
+              <div className="bg-white border border-gray-200 p-6 flex flex-col justify-between shadow-sm hover:shadow-md hover:border-primary-300 transition">
                 <div>
-                  <div className="w-10 h-10 rounded bg-secondary-500 text-primary-950 flex items-center justify-center font-bold mb-4 shadow">
+                  <div className="w-10 h-10 bg-secondary-500 text-primary-950 flex items-center justify-center font-bold mb-4 shadow-sm">
                     <ShieldCheck size={22} />
                   </div>
-                  <h3 className="text-lg font-bold text-white font-serif">1. Registar Marca Online</h3>
-                  <p className="text-xs text-primary-200 mt-2 leading-relaxed">
+                  <h3 className="text-lg font-bold text-gray-900 font-serif">1. Registar Marca Online</h3>
+                  <p className="text-xs text-gray-600 mt-2 leading-relaxed">
                     Submeta o requerimento oficial (Modelo M-1) no portal com dados do titular, logótipo, cores e selecção das Classes Internacionais de Nice.
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-primary-700/60">
+                <div className="mt-6 pt-4 border-t border-gray-100">
                   <Link
                     to="/meus-pedidos/novo?tipo=MARCA"
-                    className="inline-flex items-center gap-2 text-xs font-bold text-secondary-400 hover:text-secondary-300 transition"
+                    className="inline-flex items-center gap-2 text-xs font-bold text-primary-600 hover:text-primary-800 transition"
                   >
                     Iniciar Pedido de Registo <ArrowRight size={14} />
                   </Link>
                 </div>
               </div>
 
-              <div className="bg-primary-800/80 border border-primary-700/60 p-6 rounded-lg flex flex-col justify-between">
+              <div className="bg-white border border-gray-200 p-6 flex flex-col justify-between shadow-sm hover:shadow-md hover:border-primary-300 transition">
                 <div>
-                  <div className="w-10 h-10 rounded bg-primary-700 text-secondary-400 flex items-center justify-center font-bold mb-4 border border-primary-600">
+                  <div className="w-10 h-10 bg-primary-50 text-primary-600 flex items-center justify-center font-bold mb-4 border border-primary-200">
                     <Search size={22} />
                   </div>
-                  <h3 className="text-lg font-bold text-white font-serif">2. Busca de Anterioridade</h3>
-                  <p className="text-xs text-primary-200 mt-2 leading-relaxed">
+                  <h3 className="text-lg font-bold text-gray-900 font-serif">2. Busca de Anterioridade</h3>
+                  <p className="text-xs text-gray-600 mt-2 leading-relaxed">
                     Pesquise na base de dados pública do IAPI para verificar se já existem marcas semelhantes ou idênticas depositadas na mesma categoria.
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-primary-700/60">
+                <div className="mt-6 pt-4 border-t border-gray-100">
                   <Link
                     to="/consulta"
-                    className="inline-flex items-center gap-2 text-xs font-bold text-secondary-400 hover:text-secondary-300 transition"
+                    className="inline-flex items-center gap-2 text-xs font-bold text-primary-600 hover:text-primary-800 transition"
                   >
                     Consultar Marcas no IAPI <ArrowRight size={14} />
                   </Link>
                 </div>
               </div>
 
-              <div className="bg-primary-800/80 border border-primary-700/60 p-6 rounded-lg flex flex-col justify-between">
+              <div className="bg-white border border-gray-200 p-6 flex flex-col justify-between shadow-sm hover:shadow-md hover:border-primary-300 transition">
                 <div>
-                  <div className="w-10 h-10 rounded bg-primary-700 text-secondary-400 flex items-center justify-center font-bold mb-4 border border-primary-600">
+                  <div className="w-10 h-10 bg-primary-50 text-primary-600 flex items-center justify-center font-bold mb-4 border border-primary-200">
                     <CreditCard size={22} />
                   </div>
-                  <h3 className="text-lg font-bold text-white font-serif">3. Emolumentos & Guia RUPE</h3>
-                  <p className="text-xs text-primary-200 mt-2 leading-relaxed">
+                  <h3 className="text-lg font-bold text-gray-900 font-serif">3. Emolumentos & Guia RUPE</h3>
+                  <p className="text-xs text-gray-600 mt-2 leading-relaxed">
                     Pagamento oficial da taxa de depósito emitido pelo Ministério das Finanças (CUTE/DNT) com liquidação instantânea por Multicaixa ou Internet Banking.
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-primary-700/60">
+                <div className="mt-6 pt-4 border-t border-gray-100">
                   <Link
                     to="/servicos/marca"
-                    className="inline-flex items-center gap-2 text-xs font-bold text-secondary-400 hover:text-secondary-300 transition"
+                    className="inline-flex items-center gap-2 text-xs font-bold text-primary-600 hover:text-primary-800 transition"
                   >
                     Ver Tabela Oficial de Taxas <ArrowRight size={14} />
                   </Link>
@@ -107,15 +107,15 @@ export default function HomePage() {
             </div>
 
             {/* O FLUXO OFICIAL DO IAPI — LINHA DO TEMPO */}
-            <div className="bg-primary-950/70 border border-primary-800 rounded-lg p-6 sm:p-8">
+            <div className="bg-white border border-gray-200 shadow-sm p-6 sm:p-8">
               <div className="text-center max-w-2xl mx-auto mb-10">
-                <span className="text-xs uppercase font-mono tracking-widest text-secondary-400 block mb-1">
+                <span className="text-xs uppercase font-mono tracking-widest text-secondary-700 font-bold block mb-1">
                   Tramitação Processual Legal
                 </span>
-                <h3 className="text-xl sm:text-2xl font-bold font-serif text-white">
+                <h3 className="text-xl sm:text-2xl font-bold font-serif text-primary-900">
                   Como Funciona o Fluxo Oficial de Registo de Marca no IAPI
                 </h3>
-                <p className="text-xs text-primary-300 mt-2">
+                <p className="text-xs text-gray-500 mt-2">
                   Acompanhamento 100% digital desde o depósito inicial até à emissão do Certificado Oficial de Registo de Marca.
                 </p>
               </div>
@@ -148,18 +148,18 @@ export default function HomePage() {
                     subtitulo: 'Exame substantivo pelo examinador, despacho do Director Geral e emissão do Certificado Oficial por 10 anos.',
                   },
                 ].map((item, idx) => (
-                  <div key={idx} className="bg-primary-900/90 border border-primary-800 p-4 rounded text-left">
-                    <span className="text-xs font-mono font-bold text-secondary-400 block mb-1.5">{item.passo}</span>
-                    <strong className="text-sm font-bold text-white block mb-1.5">{item.titulo}</strong>
-                    <p className="text-[11px] text-primary-200 leading-relaxed">{item.subtitulo}</p>
+                  <div key={idx} className="bg-slate-50 border border-gray-200 p-4 text-left hover:border-primary-400 hover:bg-primary-50/30 transition">
+                    <span className="text-xs font-mono font-bold text-secondary-700 block mb-1.5">{item.passo}</span>
+                    <strong className="text-sm font-bold text-gray-900 block mb-1.5">{item.titulo}</strong>
+                    <p className="text-[11px] text-gray-600 leading-relaxed">{item.subtitulo}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-8 text-center pt-6 border-t border-primary-900">
+              <div className="mt-8 text-center pt-6 border-t border-gray-100">
                 <Link
                   to="/meus-pedidos/novo?tipo=MARCA"
-                  className="inline-flex items-center gap-2 bg-secondary-500 hover:bg-secondary-400 text-primary-950 font-bold px-8 py-3 text-sm rounded shadow-lg transition"
+                  className="inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-bold px-8 py-3 text-sm shadow transition"
                 >
                   <ShieldCheck size={18} />
                   Iniciar Registo de Marca no IAPI Agora

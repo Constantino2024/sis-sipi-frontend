@@ -149,7 +149,7 @@ function App() {
             <Route
               path="/dashboard-tecnico"
               element={
-                <RotaPrivada perfisPermitidos={['TECNICO']}>
+                <RotaPrivada perfisPermitidos={['TECNICO', 'TECNICO_EXAMINADOR']}>
                   <DashboardTecnicoPage />
                 </RotaPrivada>
               }
@@ -157,7 +157,7 @@ function App() {
             <Route
               path="/tecnico/processos"
               element={
-                <RotaPrivada perfisPermitidos={['TECNICO']}>
+                <RotaPrivada perfisPermitidos={['TECNICO', 'TECNICO_EXAMINADOR']}>
                   <TecnicoProcessosPage />
                 </RotaPrivada>
               }
@@ -165,7 +165,7 @@ function App() {
             <Route
               path="/tecnico/exame"
               element={
-                <RotaPrivada perfisPermitidos={['TECNICO']}>
+                <RotaPrivada perfisPermitidos={['TECNICO', 'TECNICO_EXAMINADOR']}>
                   <TecnicoExamePage />
                 </RotaPrivada>
               }
@@ -173,7 +173,7 @@ function App() {
             <Route
               path="/tecnico/pareceres"
               element={
-                <RotaPrivada perfisPermitidos={['TECNICO']}>
+                <RotaPrivada perfisPermitidos={['TECNICO', 'TECNICO_EXAMINADOR']}>
                   <TecnicoPareceresPage />
                 </RotaPrivada>
               }
@@ -181,7 +181,7 @@ function App() {
             <Route
               path="/tecnico/exigencias"
               element={
-                <RotaPrivada perfisPermitidos={['TECNICO']}>
+                <RotaPrivada perfisPermitidos={['TECNICO', 'TECNICO_EXAMINADOR']}>
                   <TecnicoExigenciasPage />
                 </RotaPrivada>
               }
@@ -190,7 +190,7 @@ function App() {
             <Route
               path="/dashboard-admin"
               element={
-                <RotaPrivada perfisPermitidos={['GESTOR']}>
+                <RotaPrivada perfisPermitidos={['GESTOR', 'ADMINISTRADOR']}>
                   <DashboardAdminPage />
                 </RotaPrivada>
               }
@@ -198,7 +198,7 @@ function App() {
             <Route
               path="/admin/pedidos"
               element={
-                <RotaPrivada perfisPermitidos={['GESTOR']}>
+                <RotaPrivada perfisPermitidos={['GESTOR', 'ADMINISTRADOR']}>
                   <PedidosAdminPage />
                 </RotaPrivada>
               }
@@ -206,7 +206,7 @@ function App() {
             <Route
               path="/admin/utilizadores"
               element={
-                <RotaPrivada perfisPermitidos={['GESTOR']}>
+                <RotaPrivada perfisPermitidos={['GESTOR', 'ADMINISTRADOR']}>
                   <UtilizadoresAdminPage />
                 </RotaPrivada>
               }
@@ -214,7 +214,7 @@ function App() {
             <Route
               path="/admin/relatorios"
               element={
-                <RotaPrivada perfisPermitidos={['GESTOR']}>
+                <RotaPrivada perfisPermitidos={['GESTOR', 'ADMINISTRADOR']}>
                   <RelatoriosAdminPage />
                 </RotaPrivada>
               }

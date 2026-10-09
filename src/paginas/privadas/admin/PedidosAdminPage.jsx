@@ -190,17 +190,17 @@ export default function PedidosAdminPage() {
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm border-collapse">
-                <thead>
-                  <tr className="bg-primary-500 text-left text-white">
-                    <th className="py-3 px-5 font-medium">Processo</th>
-                    <th className="py-3 px-4 font-medium">Título</th>
-                    <th className="py-3 px-4 font-medium">Requerente</th>
-                    <th className="py-3 px-4 font-medium">Tipo</th>
-                    <th className="py-3 px-5 font-medium">Estado</th>
-                    <th className="py-3 px-5 font-medium">Ações</th>
-                  </tr>
-                </thead>
+                <table className="w-full text-sm border-collapse">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr className="text-left text-gray-600 text-xs font-semibold uppercase tracking-wider">
+                      <th className="py-3 px-5 font-semibold">Processo</th>
+                      <th className="py-3 px-4 font-semibold">Título</th>
+                      <th className="py-3 px-4 font-semibold">Requerente</th>
+                      <th className="py-3 px-4 font-semibold">Tipo</th>
+                      <th className="py-3 px-5 font-semibold">Estado</th>
+                      <th className="py-3 px-5 font-semibold">Ações</th>
+                    </tr>
+                  </thead>
                 <tbody>
                   {pedidosFiltrados.map((p, indice) => {
                     const info = obterInfoEstado(p.estado);

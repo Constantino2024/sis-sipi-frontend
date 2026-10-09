@@ -104,12 +104,12 @@ export default function DashboardRequerentePage() {
               })}
               <div
                 style={{ borderRadius: '15px' }}
-                className="relative overflow-hidden flex flex-col justify-center bg-primary-500 text-white h-32 py-[18px] px-5 pl-6 transition-transform duration-150 ease-out hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(10,25,48,0.12)] before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-[#C9A227]"
+                className="relative overflow-hidden flex flex-col justify-center bg-white border border-gray-200 h-32 py-[18px] px-5 pl-6 transition-transform duration-150 ease-out hover:-translate-y-1 hover:shadow-[0_8px_20px_rgba(10,25,48,0.12)] before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-[#C9A227]"
               >
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-white/70 mb-2.5">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 mb-2.5">
                   Total de Pedidos
                 </p>
-                <p className="text-[28px] leading-none font-bold">{pedidos.length}</p>
+                <p className="text-[28px] leading-none font-bold text-primary-900">{pedidos.length}</p>
               </div>
             </div>
 
@@ -124,13 +124,13 @@ export default function DashboardRequerentePage() {
 
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border-collapse">
-                  <thead>
-                    <tr className="bg-primary-500 text-left text-white">
-                      <th className="py-3 px-5 font-medium">Processo</th>
-                      <th className="py-3 px-4 font-medium">Título</th>
-                      <th className="py-3 px-4 font-medium">Tipo</th>
-                      <th className="py-3 px-4 font-medium">Data de Submissão</th>
-                      <th className="py-3 px-5 font-medium">Estado</th>
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr className="text-left text-gray-600 text-xs font-semibold uppercase tracking-wider">
+                      <th className="py-3 px-5 font-semibold">Processo</th>
+                      <th className="py-3 px-4 font-semibold">Título</th>
+                      <th className="py-3 px-4 font-semibold">Tipo</th>
+                      <th className="py-3 px-4 font-semibold">Data de Submissão</th>
+                      <th className="py-3 px-5 font-semibold">Estado</th>
                     </tr>
                   </thead>
                   <tbody>

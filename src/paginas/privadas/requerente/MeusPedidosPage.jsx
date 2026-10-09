@@ -2,10 +2,11 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Plus, Pencil, Trash2, X, FileText, Clock, Receipt, Award, Eye } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, FileText, Clock, Receipt, Award, Eye, RefreshCw, AlertTriangle } from 'lucide-react';
 import CabecalhoPainel from "../../../components/privado/CabecalhoPainel";
 import { listarPedidosDoRequerente, removerPedido, obterHistorico } from "../../../services/pedidosService";
 import { obterServicoDoTipo } from "../../../services/pagamentosService";
+import { extrairMensagemErro } from "../../../services/api";
 import { obterInfoEstado, podeEditarOuEliminar, podePagar } from "../../../utilitarios/estadosPedido";
 import { useAutenticacao } from "../../../contexto/AutenticacaoContexto";
 import ModalRupe from "../../../components/pagamentos/ModalRupe";
@@ -34,6 +35,8 @@ export default function MeusPedidosPage() {
   const [aEliminar, setAEliminar] = useState(false);
   const [erroEliminar, setErroEliminar] = useState(null);
 
+  const [erroCarregamento, setErroCarregamento] = useState(null);
+
   const carregarPrecos = useCallback((lista) => {
     const tipos = [...new Set(lista.map((p) => p.tipoPropriedade))];
     Promise.all(
@@ -48,33 +51,42 @@ export default function MeusPedidosPage() {
     ).then((pares) => setServicos(Object.fromEntries(pares.filter(Boolean))));
   }, []);
 
-  const carregarPedidos = () => {
+  const carregarPedidos = useCallback(() => {
     if (!utilizador?.id) return;
     setACarregar(true);
-    listarPedidosDoRequerente(utilizador.id).then((resultado) => {
-      setPedidos(resultado);
-      setACarregar(false);
-      carregarPrecos(resultado);
-    }).catch((erro) => {
-      console.error('Erro ao carregar pedidos:', erro);
-      setACarregar(false);
-    });
-  };
+    setErroCarregamento(null);
+    listarPedidosDoRequerente(utilizador.id)
+      .then((resultado) => {
+        setPedidos(resultado);
+        setACarregar(false);
+        carregarPrecos(resultado);
+      })
+      .catch((erro) => {
+        console.error('Erro ao carregar pedidos do back-end:', erro);
+        setErroCarregamento(extrairMensagemErro(erro, 'Não foi possível comunicar com o servidor back-end.'));
+        setACarregar(false);
+      });
+  }, [utilizador, carregarPrecos]);
 
   useEffect(() => {
     if (!utilizador?.id) return;
     let cancelado = false;
-    listarPedidosDoRequerente(utilizador.id).then((resultado) => {
-      if (cancelado) return;
-      setPedidos(resultado);
-      setACarregar(false);
-      carregarPrecos(resultado);
-    }).catch((erro) => {
-      if (cancelado) return;
-      console.error('Erro ao carregar pedidos:', erro);
-      setACarregar(false);
-    });
-    return () => { cancelado = true; };
+    listarPedidosDoRequerente(utilizador.id)
+      .then((resultado) => {
+        if (cancelado) return;
+        setPedidos(resultado);
+        setACarregar(false);
+        carregarPrecos(resultado);
+      })
+      .catch((erro) => {
+        if (cancelado) return;
+        console.error('Erro ao carregar pedidos do back-end:', erro);
+        setErroCarregamento(extrairMensagemErro(erro, 'Não foi possível comunicar com o servidor back-end.'));
+        setACarregar(false);
+      });
+    return () => {
+      cancelado = true;
+    };
   }, [utilizador?.id, carregarPrecos]);
 
   function obterTaxaDoPedido(pedido) {
@@ -144,11 +156,40 @@ export default function MeusPedidosPage() {
           </div>
         )}
 
+        {erroCarregamento && (
+          <div
+            className="flex items-center justify-between gap-3 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 mb-6"
+            style={{ borderRadius: '10px' }}
+          >
+            <div className="flex items-center gap-2">
+              <AlertTriangle size={16} />
+              <span>{erroCarregamento}</span>
+            </div>
+            <button
+              type="button"
+              onClick={carregarPedidos}
+              className="text-xs font-semibold underline hover:text-red-900"
+            >
+              Tentar novamente
+            </button>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-6">
           <p className="text-sm text-gray-500">
             Consulte aqui o estado dos processos que submeteu ao SIPI.
           </p>
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={carregarPedidos}
+              disabled={aCarregar}
+              title="Recarregar do back-end"
+              className="p-2 border border-gray-200 bg-white hover:bg-gray-100 text-gray-600 transition"
+              style={{ borderRadius: '10px' }}
+            >
+              <RefreshCw size={15} className={aCarregar ? 'animate-spin' : ''} />
+            </button>
             <BotaoExportarPdf aoGerar={exportarPdf} desativado={aCarregar || pedidos.length === 0} />
             <Link
               to="/meus-pedidos/novo"
@@ -190,15 +231,15 @@ export default function MeusPedidosPage() {
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border-collapse">
-                  <thead>
-                    <tr className="bg-primary-500 text-left text-white">
-                      <th className="py-3 px-5 font-medium">Processo</th>
-                      <th className="py-3 px-4 font-medium">Título</th>
-                      <th className="py-3 px-4 font-medium">Tipo</th>
-                      <th className="py-3 px-4 font-medium">Data de Submissão</th>
-                      <th className="py-3 px-4 font-medium">Taxa</th>
-                      <th className="py-3 px-4 font-medium">Estado</th>
-                      <th className="py-3 px-5 font-medium text-right">Ações</th>
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr className="text-left text-gray-600 text-xs font-semibold uppercase tracking-wider">
+                      <th className="py-3 px-5 font-semibold">Processo</th>
+                      <th className="py-3 px-4 font-semibold">Título</th>
+                      <th className="py-3 px-4 font-semibold">Tipo</th>
+                      <th className="py-3 px-4 font-semibold">Data de Submissão</th>
+                      <th className="py-3 px-4 font-semibold">Taxa</th>
+                      <th className="py-3 px-4 font-semibold">Estado</th>
+                      <th className="py-3 px-5 font-semibold text-right">Ações</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -275,14 +316,19 @@ export default function MeusPedidosPage() {
                                 </button>
                               )}
 
-                              {!p.pago && podePagar(p.estado) && (
+                              {(p.referenciaRupe || podePagar(p.estado)) && (
                                 <button
                                   type="button"
                                   onClick={() => setPedidoParaPagar(p)}
-                                  className="inline-flex items-center gap-1 text-xs font-medium text-green-700 hover:text-green-800 px-1.5 py-1"
+                                  className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded border transition ${
+                                    p.pago
+                                      ? 'text-gray-700 bg-gray-50 hover:bg-gray-100 border-gray-200'
+                                      : 'text-green-800 bg-green-50 hover:bg-green-100 border-green-300'
+                                  }`}
+                                  title="Ver RUPE e Descarregar Nota de Cobrança em PDF"
                                 >
                                   <Receipt size={13} aria-hidden="true" />
-                                  Pagar (RUPE)
+                                  {p.pago ? 'Nota RUPE' : 'Pagar (RUPE)'}
                                 </button>
                               )}
 

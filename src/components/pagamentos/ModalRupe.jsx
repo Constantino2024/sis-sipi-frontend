@@ -1,7 +1,8 @@
 // src/components/pagamentos/ModalRupe.jsx
 import { useEffect, useRef, useState } from 'react';
-import { X, Copy, Check, RefreshCw, Loader2, CircleCheck, TriangleAlert } from 'lucide-react';
+import { X, Copy, Check, RefreshCw, Loader2, CircleCheck, TriangleAlert, FileDown } from 'lucide-react';
 import { gerarRupe, sincronizarRupe, mensagemDeErro } from '../../services/pagamentosService';
+import { gerarNotaCobrancaRupePdf } from '../../utilitarios/geradorNotaCobrancaRupePdf';
 
 function formatarValor(valor) {
   return `${Number(valor).toLocaleString('pt-PT', { minimumFractionDigits: 2 })} Kz`;
@@ -24,11 +25,14 @@ function agruparReferencia(ref) {
  *  - pedido: { id, numeroProcesso }
  *  - onFechar: () => void
  *  - onPago?: (rupe) => void   chamado quando o pagamento é confirmado
+ *  - autoBaixarPdf?: boolean   descarrega automaticamente o PDF da nota quando a RUPE estiver pronta
  */
-export default function ModalRupe({ pedido, onFechar, onPago }) {
+export default function ModalRupe({ pedido, onFechar, onPago, autoBaixarPdf = false }) {
   const [rupe, setRupe] = useState(null);
   const [aCarregar, setACarregar] = useState(true);
   const [aVerificar, setAVerificar] = useState(false);
+  const [aGerarPdf, setAGerarPdf] = useState(false);
+  const [pdfDescarregado, setPdfDescarregado] = useState(false);
   const [erro, setErro] = useState(null);
   const [aviso, setAviso] = useState(null);
   const [copiado, setCopiado] = useState(false);
@@ -97,6 +101,36 @@ export default function ModalRupe({ pedido, onFechar, onPago }) {
       setAVerificar(false);
     }
   }
+
+  async function descarregarNotaCobrancaPdf() {
+    if (!rupe) return;
+    setAGerarPdf(true);
+    setAviso(null);
+    try {
+      await gerarNotaCobrancaRupePdf({ pedido, rupe });
+      setPdfDescarregado(true);
+    } catch (e) {
+      console.error('Erro ao gerar Nota de Cobrança em PDF:', e);
+      setAviso('Ocorreu um erro ao gerar o documento PDF. Tente novamente.');
+    } finally {
+      setAGerarPdf(false);
+    }
+  }
+
+  const jaAutoBaixouRef = useRef(false);
+
+  // Descarregamento automático opcional (ex: ao finalizar o pedido)
+  useEffect(() => {
+    if (autoBaixarPdf && rupe && !jaAutoBaixouRef.current) {
+      jaAutoBaixouRef.current = true;
+      const timeoutId = setTimeout(() => {
+        gerarNotaCobrancaRupePdf({ pedido, rupe })
+          .then(() => setPdfDescarregado(true))
+          .catch((e) => console.error('Erro ao gerar Nota de Cobrança:', e));
+      }, 400);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [autoBaixarPdf, rupe, pedido]);
 
   const paga = rupe?.estado === 'PAGO';
 
@@ -261,6 +295,29 @@ export default function ModalRupe({ pedido, onFechar, onPago }) {
                 {aviso}
               </p>
             )}
+
+            {/* Botão Oficial: Descarregar Nota de Cobrança RUPE em PDF */}
+            <div className="mb-4">
+              <button
+                type="button"
+                onClick={descarregarNotaCobrancaPdf}
+                disabled={aGerarPdf}
+                className="w-full inline-flex items-center justify-center gap-2 bg-[#C9A227] hover:bg-[#b08e20] disabled:opacity-60 text-primary-950 font-bold text-sm px-4 py-2.5 shadow-sm transition"
+                style={{ borderRadius: '10px' }}
+              >
+                {aGerarPdf ? (
+                  <Loader2 size={16} className="animate-spin text-primary-950" aria-hidden="true" />
+                ) : (
+                  <FileDown size={16} className="text-primary-950" aria-hidden="true" />
+                )}
+                <span>{aGerarPdf ? 'A Gerar Nota de Cobrança…' : 'Descarregar Nota de Cobrança (PDF)'}</span>
+              </button>
+              {pdfDescarregado && (
+                <p className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 py-1.5 px-3 mt-1.5 text-center font-medium" style={{ borderRadius: '6px' }}>
+                  Nota de Cobrança oficial gerada e descarregada com sucesso!
+                </p>
+              )}
+            </div>
 
             <div className="flex items-center gap-2">
               {!paga && (

@@ -126,31 +126,35 @@ const ESTRUTURA_POR_PERFIL = {
     },
   ],
 };
+ESTRUTURA_POR_PERFIL.TECNICO_EXAMINADOR = ESTRUTURA_POR_PERFIL.TECNICO;
+ESTRUTURA_POR_PERFIL.ADMINISTRADOR = ESTRUTURA_POR_PERFIL.GESTOR;
 
 const ROTULO_PERFIL = {
   REQUERENTE: 'Requerente',
   TECNICO: 'Técnico',
+  TECNICO_EXAMINADOR: 'Técnico',
   GESTOR: 'Administrador',
+  ADMINISTRADOR: 'Administrador',
 };
 
 export default function MenuLateral({ perfil, nomeUtilizador }) {
   const grupos = ESTRUTURA_POR_PERFIL[perfil] ?? [];
 
   return (
-    <nav className="w-64 shrink-0 min-h-screen bg-primary-500 flex flex-col">
+    <nav className="w-64 shrink-0 min-h-screen bg-white border-r border-gray-200 flex flex-col">
       {/* Marca */}
-      <div className="h-16 flex items-center gap-2 px-5 border-b border-white/15">
-        <div className="w-8 h-8 bg-primary-900 flex items-center justify-center">
+      <div className="h-16 flex items-center gap-2 px-5 border-b border-gray-200 bg-white">
+        <div className="w-8 h-8 bg-primary-600 flex items-center justify-center">
           <span className="text-[#C9A227] font-bold text-sm tracking-wide">SI</span>
         </div>
-        <span className="text-white font-semibold tracking-wide text-sm">SIPI</span>
+        <span className="text-primary-900 font-bold tracking-wide text-sm">SIPI</span>
       </div>
 
       {/* Navegação */}
       <div className="flex-1 overflow-y-auto py-5 px-3">
         {grupos.map((grupo) => (
           <div key={grupo.grupo} className="mb-6">
-            <p className="px-3 mb-2 text-[11px] font-semibold tracking-wider uppercase text-white/50">
+            <p className="px-3 mb-2 text-[11px] font-semibold tracking-wider uppercase text-gray-400">
               {grupo.grupo}
             </p>
             <ul className="space-y-0.5">
@@ -163,8 +167,8 @@ export default function MenuLateral({ perfil, nomeUtilizador }) {
                       className={({ isActive }) =>
                         `group relative flex items-center gap-3 px-3 py-2.5 text-sm border-l-2 transition-colors ${
                           isActive
-                            ? 'bg-primary-900/60 border-[#C9A227] text-white font-medium'
-                            : 'border-transparent text-white/70 hover:bg-primary-900/40 hover:text-white'
+                            ? 'bg-primary-50 border-[#C9A227] text-primary-900 font-semibold'
+                            : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-primary-900'
                         }`
                       }
                     >
@@ -180,15 +184,15 @@ export default function MenuLateral({ perfil, nomeUtilizador }) {
       </div>
 
       {/* Rodapé — perfil actual */}
-      <div className="px-5 py-4 border-t border-white/15 flex items-center gap-3">
-        <div className="w-8 h-8 bg-white/10 flex items-center justify-center shrink-0">
-          <Icone.Perfil className="w-4 h-4 text-white" />
+      <div className="px-5 py-4 border-t border-gray-200 flex items-center gap-3 bg-gray-50/50">
+        <div className="w-8 h-8 bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
+          <Icone.Perfil className="w-4 h-4 text-gray-600" />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-medium text-white truncate">
+          <p className="text-sm font-medium text-gray-900 truncate">
             {nomeUtilizador ?? ROTULO_PERFIL[perfil] ?? 'Utilizador'}
           </p>
-          <p className="text-xs text-white/60 truncate">{ROTULO_PERFIL[perfil]}</p>
+          <p className="text-xs text-gray-500 truncate">{ROTULO_PERFIL[perfil]}</p>
         </div>
       </div>
     </nav>

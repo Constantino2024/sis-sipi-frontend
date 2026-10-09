@@ -7,7 +7,6 @@ import {
   X,
   Loader2,
   Search,
-  Sparkles,
   ShieldCheck,
   CreditCard,
   Building,
@@ -21,6 +20,7 @@ import {
 import CabecalhoPainel from '../../../components/privado/CabecalhoPainel';
 import { criarPedido } from '../../../services/pedidosService';
 import { uploadAnexo } from '../../../services/anexosService';
+import { listarClassificacoes } from '../../../services/classificacoesService';
 import { useAutenticacao } from '../../../contexto/AutenticacaoContexto';
 import ModalRupe from '../../../components/pagamentos/ModalRupe';
 import {
@@ -90,13 +90,13 @@ export default function NovoPedidoPage() {
   // --- Passo 1: Titular e Representação ---
   const [tipoPessoa, setTipoPessoa] = useState(utilizador?.tipo_utilizador || 'PESSOA_SINGULAR');
   const [nomeTitular, setNomeTitular] = useState(utilizador?.nome || '');
-  const [nifTitular, setNifTitular] = useState(utilizador?.nif || '009150115UE044');
+  const [nifTitular, setNifTitular] = useState(utilizador?.nif || '');
   const [nacionalidade, setNacionalidade] = useState('Angolana');
-  const [provincia, setProvincia] = useState('Luanda');
-  const [municipio, setMunicipio] = useState('Luanda');
-  const [endereco, setEndereco] = useState('Avenida 4 de Fevereiro');
-  const [telefone, setTelefone] = useState(utilizador?.telefone || '+244 923 000 001');
-  const [email, setEmail] = useState(utilizador?.email || 'requerente@sipi.ao');
+  const [provincia, setProvincia] = useState('');
+  const [municipio, setMunicipio] = useState('');
+  const [endereco, setEndereco] = useState('');
+  const [telefone, setTelefone] = useState(utilizador?.telefone || '');
+  const [email, setEmail] = useState(utilizador?.email || '');
   const [tipoRepresentante, setTipoRepresentante] = useState('PROPRIO');
   const [nomeMandatario, setNomeMandatario] = useState('');
   const [cedulaMandatario, setCedulaMandatario] = useState('');
@@ -117,12 +117,36 @@ export default function NovoPedidoPage() {
   const [descricaoGeral, setDescricaoGeral] = useState('');
 
   // --- Passo 3: Classificação de Nice ---
+  const [listaClassesNice, setListaClassesNice] = useState(CLASSES_NICE);
   const [buscaNice, setBuscaNice] = useState('');
   const [filtroTipoNice, setFiltroTipoNice] = useState('TODOS'); // 'TODOS' | 'PRODUTO' | 'SERVICO'
-  const [classesSelecionadas, setClassesSelecionadas] = useState([32]); // Padrão: Classe 32 (Bebidas/Cervejas/Águas)
-  const [especificacoesPorClasse, setEspecificacoesPorClasse] = useState({
-    32: 'Cervejas nacionais; águas minerais e de mesa; sumos de frutas e refrigerantes gaseificados.',
-  });
+  const [classesSelecionadas, setClassesSelecionadas] = useState([]);
+  const [especificacoesPorClasse, setEspecificacoesPorClasse] = useState({});
+
+  // Carregar classificações dinamicamente do back-end
+  useEffect(() => {
+    let cancelado = false;
+    listarClassificacoes()
+      .then((dados) => {
+        if (!cancelado && Array.isArray(dados) && dados.length > 0) {
+          setListaClassesNice(
+            dados.map((c) => ({
+              classe: Number(c.classe || c.numero || c.id),
+              titulo: c.titulo || c.nome || `Classe ${c.classe}`,
+              tipo: c.tipo || 'PRODUTO',
+              descricao: c.descricao || '',
+              exemplos: c.exemplos || c.especificacao || '',
+            }))
+          );
+        }
+      })
+      .catch(() => {
+        // Mantém a tabela oficial caso o endpoint ainda não esteja povoado no back-end
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, []);
 
   // --- Passo 4: Documentos Anexados ---
   const [documentos, setDocumentos] = useState([]);
@@ -131,126 +155,6 @@ export default function NovoPedidoPage() {
   const [aSubmeter, setASubmeter] = useState(false);
   const [erro, setErro] = useState(null);
   const [pedidoCriado, setPedidoCriado] = useState(null);
-
-  function aplicarModeloPredefinido(tipoModelo) {
-    if (tipoModelo === 'PRODUTO_BEBIDAS') {
-      setNaturezaMarca('PRODUTO');
-      setApresentacaoMarca('MISTA');
-      setDenominacaoMarca('CUANZA OURO');
-      setLogotipoPreview('https://placehold.co/400x300/0A2A44/FFFFFF?text=CUANZA+OURO');
-      setReivindicaCores(true);
-      setCoresReivindicadas('Dourado, Azul petróleo e Branco');
-      setDisclaimer('Não se reivindica o uso exclusivo da palavra "Ouro".');
-      setReivindicaPrioridade(false);
-      setClassesSelecionadas([32]);
-      setEspecificacoesPorClasse({
-        32: 'Cervejas especiais artesanais e industriais; águas minerais gaseificadas; sumos de frutas e refrigerantes gaseificados fabricados em Angola.',
-      });
-      setNomeTitular('Sociedade Angolana de Bebidas, Lda.');
-      setNifTitular('5418092314');
-      setTipoPessoa('PESSOA_COLECTIVA');
-      setProvincia('Luanda');
-      setMunicipio('Viana');
-      setEndereco('Polo Industrial de Viana, Estrada de Catete, Luanda');
-      setTelefone('+244 923 111 222');
-      setEmail('marcas@cuanzaouro.ao');
-      setTipoRepresentante('PROPRIO');
-    } else if (tipoModelo === 'SERVICO_FINTECH') {
-      setNaturezaMarca('SERVICO');
-      setApresentacaoMarca('MISTA');
-      setDenominacaoMarca('KAMBAS PAY');
-      setLogotipoPreview('https://placehold.co/400x300/0A2A44/FFFFFF?text=KAMBAS+PAY');
-      setReivindicaCores(true);
-      setCoresReivindicadas('Azul elétrico e Amarelo');
-      setDisclaimer('');
-      setReivindicaPrioridade(false);
-      setClassesSelecionadas([36, 42]);
-      setEspecificacoesPorClasse({
-        36: 'Serviços de transferência monetária electrónica; pagamentos via telemóvel; serviços de cartões pré-pagos e banca digital.',
-        42: 'Desenvolvimento e manutenção de software de processamento seguro de pagamentos e aplicações financeiras para smartphones.',
-      });
-      setNomeTitular('Kambas Pagamentos Digitais, S.A.');
-      setNifTitular('5001239845');
-      setTipoPessoa('PESSOA_COLECTIVA');
-      setProvincia('Luanda');
-      setMunicipio('Belas');
-      setEndereco('Avenida Talatona, Centro Empresarial, Luanda');
-      setTelefone('+244 934 888 999');
-      setEmail('juridico@kambaspay.ao');
-      setTipoRepresentante('AOPI');
-      setNomeMandatario('Dr. Carlos Alberto Silva');
-      setCedulaMandatario('AOPI N.º 018/IAPI');
-    } else if (tipoModelo === 'COLECTIVA_CAFE') {
-      setNaturezaMarca('COLECTIVA');
-      setApresentacaoMarca('MISTA');
-      setDenominacaoMarca('CAFÉ DO UÍGE COLECTIVO');
-      setLogotipoPreview('https://placehold.co/400x300/0A2A44/FFFFFF?text=CAFE+DO+UIGE');
-      setReivindicaCores(true);
-      setCoresReivindicadas('Castanho torrado e Verde folha');
-      setDisclaimer('Não se reivindica exclusividade sobre o termo "Café".');
-      setReivindicaPrioridade(false);
-      setClassesSelecionadas([30]);
-      setEspecificacoesPorClasse({
-        30: 'Café Robusta e Arábica cultivado e seleccionado pelos membros associados na província do Uíge, em grão e moído.',
-      });
-      setNomeTitular('Associação dos Produtores de Café do Uíge');
-      setNifTitular('5109847120');
-      setTipoPessoa('PESSOA_COLECTIVA');
-      setProvincia('Uíge');
-      setMunicipio('Uíge');
-      setEndereco('Estrada Nacional 120, Km 4, Sede da Associação');
-      setTelefone('+244 928 444 555');
-      setEmail('contato@cafeuige.coop.ao');
-      setTipoRepresentante('PROPRIO');
-    } else if (tipoModelo === 'CERTIFICACAO_ORIGEM') {
-      setNaturezaMarca('CERTIFICACAO');
-      setApresentacaoMarca('FIGURATIVA');
-      setDenominacaoMarca('SELO PRODUZIDO EM ANGOLA');
-      setLogotipoPreview('https://placehold.co/400x300/0A2A44/FFFFFF?text=SELO+ANGOLA');
-      setReivindicaCores(true);
-      setCoresReivindicadas('Vermelho, Amarelo e Preto');
-      setDisclaimer('');
-      setReivindicaPrioridade(false);
-      setClassesSelecionadas([29, 31]);
-      setEspecificacoesPorClasse({
-        29: 'Certificação de carnes, peixes, frutas e legumes processados e embalados em Angola com padrões oficiais de qualidade.',
-        31: 'Certificação de produtos agrícolas em estado natural e sementes com garantia de origem em solo angolano.',
-      });
-      setNomeTitular('Instituto Nacional de Certificação e Normas');
-      setNifTitular('5000123987');
-      setTipoPessoa('PESSOA_COLECTIVA');
-      setProvincia('Luanda');
-      setMunicipio('Luanda');
-      setEndereco('Rua Rainha Ginga, Edifício das Câmaras de Comércio');
-      setTelefone('+244 923 000 777');
-      setEmail('certificacao@origemangola.gov.ao');
-      setTipoRepresentante('PROPRIO');
-    } else if (tipoModelo === 'NOMINATIVA_HOTEL') {
-      setNaturezaMarca('SERVICO');
-      setApresentacaoMarca('NOMINATIVA');
-      setDenominacaoMarca('LUANDA SKY RESORT');
-      setLogotipoPreview(null);
-      setLogotipoFicheiro(null);
-      setReivindicaCores(false);
-      setCoresReivindicadas('');
-      setDisclaimer('Sem exclusividade para o termo geográfico "Luanda".');
-      setReivindicaPrioridade(false);
-      setClassesSelecionadas([43]);
-      setEspecificacoesPorClasse({
-        43: 'Serviços de alojamento hoteleiro de luxo; restauração, bares, catering e organização de banquetes turísticos.',
-      });
-      setNomeTitular('Empreendimentos Turísticos da Baía, Lda.');
-      setNifTitular('5008172635');
-      setTipoPessoa('PESSOA_COLECTIVA');
-      setProvincia('Luanda');
-      setMunicipio('Luanda');
-      setEndereco('Avenida 4 de Fevereiro, Marginal de Luanda');
-      setTelefone('+244 923 555 888');
-      setEmail('reservas@luandasky.co.ao');
-      setTipoRepresentante('PROPRIO');
-    }
-    setErro(null);
-  }
 
   // Cálculos de Emolumentos Oficiais do IAPI
   const taxasCalculadas = useMemo(() => {
@@ -263,7 +167,7 @@ export default function NovoPedidoPage() {
   // Classes de Nice filtradas
   const classesFiltradas = useMemo(() => {
     const termo = buscaNice.trim().toLowerCase();
-    return CLASSES_NICE.filter((c) => {
+    return listaClassesNice.filter((c) => {
       const matchTipo =
         filtroTipoNice === 'TODOS' || c.tipo === filtroTipoNice;
       const matchTermo =
@@ -274,7 +178,7 @@ export default function NovoPedidoPage() {
         c.exemplos.toLowerCase().includes(termo);
       return matchTipo && matchTermo;
     });
-  }, [buscaNice, filtroTipoNice]);
+  }, [listaClassesNice, buscaNice, filtroTipoNice]);
 
   useEffect(() => {
     if (!utilizador) {
@@ -292,7 +196,7 @@ export default function NovoPedidoPage() {
     } else {
       setClassesSelecionadas((atuais) => [...atuais, numClasse].sort((a, b) => a - b));
       // Preencher sugestão inicial de especificação
-      const classeObj = CLASSES_NICE.find((c) => c.classe === numClasse);
+      const classeObj = listaClassesNice.find((c) => c.classe === numClasse);
       if (classeObj && !especificacoesPorClasse[numClasse]) {
         setEspecificacoesPorClasse((prev) => ({
           ...prev,
@@ -403,7 +307,7 @@ export default function NovoPedidoPage() {
     try {
       // Montar dados completos da Marca segundo o IAPI
       const classesMontadas = classesSelecionadas.map((num) => {
-        const obj = CLASSES_NICE.find((c) => c.classe === num);
+        const obj = listaClassesNice.find((c) => c.classe === num);
         return {
           classe: num,
           titulo: obj?.titulo || `Classe ${num}`,
@@ -553,34 +457,6 @@ export default function NovoPedidoPage() {
                 <span className="text-xs block leading-tight">{etapa.label}</span>
               </button>
             ))}
-          </div>
-
-          {/* Modelos Oficiais de Demonstração Rápida */}
-          <div className="mt-5 pt-4 border-t border-primary-800/70">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-[11px] font-semibold text-secondary-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles size={13} />
-                Exemplos Rápidos de Marcas (IAPI):
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  { id: 'PRODUTO_BEBIDAS', label: 'Produto (Bebidas)' },
-                  { id: 'SERVICO_FINTECH', label: 'Serviço (Fintech)' },
-                  { id: 'COLECTIVA_CAFE', label: 'Colectiva (Café)' },
-                  { id: 'CERTIFICACAO_ORIGEM', label: 'Certificação (Selo)' },
-                  { id: 'NOMINATIVA_HOTEL', label: 'Nominativa (Hotel)' },
-                ].map((mod) => (
-                  <button
-                    key={mod.id}
-                    type="button"
-                    onClick={() => aplicarModeloPredefinido(mod.id)}
-                    className="px-2.5 py-1 bg-primary-800/90 hover:bg-secondary-500 hover:text-primary-950 text-primary-100 text-[11px] font-medium rounded border border-primary-700/80 transition"
-                  >
-                    {mod.label}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
 
@@ -1534,11 +1410,12 @@ export default function NovoPedidoPage() {
         </form>
       </main>
 
-      {/* Modal da RUPE pós-submissão */}
+      {/* Modal da RUPE pós-submissão com geração automática de PDF da Nota de Cobrança */}
       {pedidoCriado && (
         <ModalRupe
           pedido={pedidoCriado}
           onFechar={fecharModalRupe}
+          autoBaixarPdf={true}
         />
       )}
     </div>

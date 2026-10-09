@@ -1,6 +1,5 @@
 // src/services/consultaPublicaService.js
-import api, { isNetworkError } from './api';
-import { obterPedidos } from '../data/pedidosMock';
+import api from './api';
 
 const LABELS_TIPO = {
   MARCA: 'Marca',
@@ -22,62 +21,34 @@ const LABELS_ESTADO = {
 };
 
 /**
- * Pesquisa pública de processos (publicados, em oposição ou concedidos).
- * GET /api/publico/pesquisa/?termo=&tipo= — sem autenticação, máximo 100
- * resultados, só dados públicos (RB05/RB06).
+ * Pesquisa pública de processos diretamente no back-end.
+ * GET /api/publico/pesquisa/?termo=&tipo=
  */
 export async function pesquisarRegistosPublicos({ termo = '', tipo = '' } = {}) {
   const params = {};
   if (termo.trim()) params.termo = termo.trim();
   if (tipo) params.tipo = tipo;
 
-  try {
-    const resposta = await api.get('/publico/pesquisa/', { params });
-    const { total, limite, results } = resposta.data;
+  const resposta = await api.get('/publico/pesquisa/', { params });
+  const dados = resposta.data;
+  const lista = Array.isArray(dados?.results)
+    ? dados.results
+    : Array.isArray(dados)
+    ? dados
+    : [];
 
-    return {
-      total,
-      limite,
-      resultados: results.map((r) => ({
-        numero: r.numero,
-        designacao: r.designacao,
-        titular: r.titular,
-        tipo: r.tipo,
-        tipoDisplay: r.tipo_display,
-        classe: r.classe,
-        estado: r.estado,
-        estadoDisplay: r.estado_display,
-      })),
-    };
-  } catch (error) {
-    if (isNetworkError(error)) {
-      const todos = obterPedidos();
-      const termoNormalizado = termo.trim().toLowerCase();
-      const filtrados = todos.filter((p) => {
-        const correspondeTipo = !tipo || p.tipoPropriedade === tipo;
-        const correspondeTermo =
-          !termoNormalizado ||
-          p.numeroProcesso?.toLowerCase().includes(termoNormalizado) ||
-          p.titulo?.toLowerCase().includes(termoNormalizado) ||
-          p.requerenteNome?.toLowerCase().includes(termoNormalizado);
-        return correspondeTipo && correspondeTermo;
-      });
-
-      return {
-        total: filtrados.length,
-        limite: 100,
-        resultados: filtrados.map((r, index) => ({
-          numero: r.numeroProcesso,
-          designacao: r.titulo,
-          titular: r.requerenteNome,
-          tipo: r.tipoPropriedade,
-          tipoDisplay: LABELS_TIPO[r.tipoPropriedade] || r.tipoPropriedade,
-          classe: `Classe ${30 + (index % 10)}`,
-          estado: r.estado,
-          estadoDisplay: LABELS_ESTADO[r.estado] || r.estado,
-        })),
-      };
-    }
-    throw error;
-  }
+  return {
+    total: dados?.total ?? lista.length,
+    limite: dados?.limite ?? 100,
+    resultados: lista.map((r) => ({
+      numero: r.numero || r.numero_processo || r.numeroProcesso,
+      designacao: r.designacao || r.titulo,
+      titular: r.titular || r.requerente_nome || r.requerenteNome || '—',
+      tipo: r.tipo || r.tipoPropriedade,
+      tipoDisplay: r.tipo_display || LABELS_TIPO[r.tipo] || r.tipo,
+      classe: r.classe || (r.classesNice?.[0]?.classe ? `Classe ${r.classesNice[0].classe}` : '—'),
+      estado: r.estado,
+      estadoDisplay: r.estado_display || LABELS_ESTADO[r.estado] || r.estado,
+    })),
+  };
 }
