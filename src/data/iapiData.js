@@ -231,28 +231,28 @@ export const formularios = [
 // Perguntas frequentes exibidas na secção final da homepage.
 export const faqs = [
   {
+    pergunta: 'Quanto custa registar uma marca no IAPI?',
+    resposta:
+      'A taxa oficial de depósito para a 1.ª classe de Nice é de 25.000,00 Kz. Para cada classe adicional solicitada no mesmo pedido, acresce 10.000,00 Kz. Se for reivindicada prioridade internacional (CUP), acresce 15.000,00 Kz. O pagamento é efectuado através de RUPE emitida pelo Ministério das Finanças (CUTE/AGT) no Multicaixa ou Internet Banking.',
+  },
+  {
+    pergunta: 'Qual a validade do registo de marca concedido pelo IAPI?',
+    resposta:
+      'Nos termos da Lei n.º 3/92 da Propriedade Industrial, o registo de marca confere protecção e uso exclusivo em toda a República de Angola pelo período de 10 anos a contar da data de depósito, renovável indefinidamente por iguais períodos mediante pagamento da taxa de renovação decenal.',
+  },
+  {
+    pergunta: 'O que é a Classificação Internacional de Nice (NCL)?',
+    resposta:
+      'É o sistema internacional oficial adoptado por Angola e pelo IAPI para classificar produtos (Classes 1 a 34) e serviços (Classes 35 a 45). Cada classe deve conter a especificação detalhada e precisa dos bens ou serviços assinalados pela marca.',
+  },
+  {
     pergunta: 'Quanto tempo demora o registo de uma marca?',
     resposta:
-      'Após a submissão, o pedido passa por exame formal, publicação e um prazo de oposição de 60 dias. Se não houver oposições procedentes, o exame substantivo e a decisão final ocorrem tipicamente entre 8 e 12 meses.',
-  },
-  {
-    pergunta: 'Que documentos preciso para submeter um pedido?',
-    resposta:
-      'Depende do tipo de propriedade: para marcas, a representação do sinal e a classe de Nice; para patentes, a memória descritiva e reivindicações; para desenhos industriais, as representações gráficas do produto. O SIPI indica os campos obrigatórios em cada formulário.',
-  },
-  {
-    pergunta: 'Como acompanho o estado do meu processo?',
-    resposta:
-      'Depois de autenticado, a área "Os Meus Pedidos" mostra o estado actual e o histórico completo de cada processo, desde o rascunho até à concessão do certificado.',
+      'Após o depósito e liquidação da RUPE, o processo é sujeito a exame formal e publicado no Boletim da Propriedade Industrial (BPI). Segue-se o prazo legal de 90 dias para oposição de terceiros (Art. 64.º da Lei 3/92). Sem oposições procedentes, o exame de mérito e despacho final ocorrem habitualmente entre 8 e 12 meses.',
   },
   {
     pergunta: 'Posso registar online sem sair de casa?',
     resposta:
-      'Sim. Todo o processo — submissão, pagamento via CUTE e emissão de comprovativos — é feito electronicamente no SIPI, sem necessidade de deslocação ao IAPI.',
-  },
-  {
-    pergunta: 'O que acontece se alguém se opuser ao meu pedido?',
-    resposta:
-      'O pedido passa ao estado "Em Oposição" e um Técnico Examinador analisa os fundamentos apresentados. Será notificado e poderá responder antes da decisão final.',
+      'Sim. Todo o processo no SIPI — preenchimento do formulário Modelo M-1, anexação do logótipo, liquidação por RUPE, acompanhamento da tramitação e emissão do Certificado Oficial de Registo de Marca — é 100% electrónico.',
   },
 ];

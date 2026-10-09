@@ -1,0 +1,7 @@
+{
+  "name": "SIPI - Sistema de Informação da Propriedade Intelectual",
+  "description": "Portal oficial do Instituto Angolano da Propriedade Intelectual (IAPI) para registo e consulta de marcas, patentes e desenhos industriais.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

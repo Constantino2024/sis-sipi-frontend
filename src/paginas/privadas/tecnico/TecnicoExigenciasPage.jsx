@@ -17,16 +17,35 @@ export default function TecnicoExigenciasPage() {
   const [aGuardar, setAGuardar] = useState(false);
   const [erro, setErro] = useState('');
 
-  async function carregar() {
+  const carregar = async () => {
+    if (!utilizador?.id) return;
     setACarregar(true);
-    const resultado = await listarPedidosDoTecnico(utilizador.id);
-    setProcessos(resultado);
-    setACarregar(false);
-  }
+    try {
+      const resultado = await listarPedidosDoTecnico(utilizador.id);
+      setProcessos(resultado);
+    } catch {
+      setProcessos([]);
+    } finally {
+      setACarregar(false);
+    }
+  };
 
   useEffect(() => {
-    carregar();
-  }, [utilizador.id]);
+    if (!utilizador?.id) return;
+    let cancelado = false;
+    listarPedidosDoTecnico(utilizador.id).then((resultado) => {
+      if (!cancelado) {
+        setProcessos(resultado);
+        setACarregar(false);
+      }
+    }).catch(() => {
+      if (!cancelado) {
+        setProcessos([]);
+        setACarregar(false);
+      }
+    });
+    return () => { cancelado = true; };
+  }, [utilizador?.id]);
 
   const processosElegiveis = useMemo(
     () => processos.filter((p) => podeEmitirExigencia(p.estado)),

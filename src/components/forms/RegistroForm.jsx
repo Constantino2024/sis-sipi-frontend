@@ -30,7 +30,6 @@ export default function RegistroForm() {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm();
 
   const onSubmit = async (dados) => {

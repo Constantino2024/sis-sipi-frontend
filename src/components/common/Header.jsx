@@ -53,10 +53,16 @@ export default function Header() {
               Entrar
             </NavLink>
             <Link
-              to="/registro"
-              className="ml-2 bg-primary-500 text-white hover:bg-primary-600 px-5 py-2 text-sm font-semibold transition-colors"
+              to="/meus-pedidos/novo?tipo=MARCA"
+              className="ml-2 bg-secondary-500 hover:bg-secondary-400 text-primary-950 px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors shadow-sm flex items-center gap-1.5"
             >
-              Registar
+              Registar Marca
+            </Link>
+            <Link
+              to="/registro"
+              className="ml-1 bg-primary-500 text-white hover:bg-primary-600 px-4 py-2 text-xs font-semibold transition-colors"
+            >
+              Criar Conta
             </Link>
           </nav>
 
@@ -100,12 +106,20 @@ export default function Header() {
               Entrar
             </NavLink>
             <Link
-              to="/registro"
+              to="/meus-pedidos/novo?tipo=MARCA"
               onClick={() => setMobileMenuOpen(false)}
-              className="block mt-2 bg-primary-500 text-white text-center px-4 py-3 text-sm font-semibold"
+              className="block mt-2 bg-secondary-500 text-primary-950 font-bold text-center px-4 py-3 text-sm uppercase tracking-wider"
               role="menuitem"
             >
-              Registar
+              Registar Marca no IAPI
+            </Link>
+            <Link
+              to="/registro"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block mt-1 bg-primary-500 text-white text-center px-4 py-2.5 text-sm font-semibold"
+              role="menuitem"
+            >
+              Criar Conta
             </Link>
           </div>
         )}

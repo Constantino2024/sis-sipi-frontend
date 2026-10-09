@@ -5,7 +5,7 @@ import { NavLink } from 'react-router-dom';
 import { useAutenticacao } from '../../../contexto/AutenticacaoContexto';
 import CabecalhoPainel from '../../../components/privado/CabecalhoPainel';
 import { listarPedidosDoTecnico, atribuirTecnico } from '../../../services/pedidosService';
-import { obterInfoEstado, listarEstados, podeEditarOuEliminar } from '../../../utilitarios/estadosPedido';
+import { obterInfoEstado, listarEstados } from '../../../utilitarios/estadosPedido';
 
 export default function TecnicoProcessosPage() {
   const { utilizador } = useAutenticacao();
@@ -13,7 +13,6 @@ export default function TecnicoProcessosPage() {
   const [aCarregar, setACarregar] = useState(true);
   const [filtroEstado, setFiltroEstado] = useState('TODOS');
   const [busca, setBusca] = useState('');
-  const [tecnicoAtual, setTecnicoAtual] = useState(null);
 
   useEffect(() => {
     async function carregar() {
@@ -115,7 +114,6 @@ export default function TecnicoProcessosPage() {
               ) : (
                 processosFiltrados.map((p) => {
                   const infoEstado = obterInfoEstado(p.estado);
-                  const editavel = podeEditarOuEliminar(p.estado);
                   return (
                     <tr key={p.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 font-medium text-gray-900">{p.numeroProcesso}</td>

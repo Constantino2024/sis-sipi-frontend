@@ -51,4 +51,14 @@ api.interceptors.response.use(
   }
 );
 
+export function isNetworkError(error) {
+  return (
+    !import.meta.env.VITE_API_URL ||
+    error?.code === 'ERR_NETWORK' ||
+    error?.message?.includes('Network Error') ||
+    error?.message?.includes('Failed to fetch') ||
+    (!error?.response && Boolean(error?.request))
+  );
+}
+
 export default api;

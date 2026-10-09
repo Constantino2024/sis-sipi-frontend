@@ -30,16 +30,13 @@ export default function PedidosAdminPage() {
   const [motivoRejeicao, setMotivoRejeicao] = useState('');
 
   useEffect(() => {
-    carregarPedidos();
-  }, []);
-
-  function carregarPedidos() {
-    setACarregar(true);
     listarTodosPedidos().then((resultado) => {
       setPedidos(resultado);
       setACarregar(false);
     });
-  }
+  }, []);
+
+
 
   function atualizarPedidoNaLista(pedidoAtualizado) {
     setPedidos((atual) =>

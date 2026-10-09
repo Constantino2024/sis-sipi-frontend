@@ -23,9 +23,11 @@ export async function listarPendentesAnaliseMock() {
 }
 
 /** Usado por "Meus Processos", "Exigências" e "Pareceres" do Técnico:
- *  todos os pedidos atribuídos a esse técnico, independentemente do estado. */
+ *  todos os pedidos atribuídos a esse técnico, ou ainda por atribuir. */
 export async function listarPorTecnicoMock(tecnicoId) {
-  const pedidos = obterPedidos().filter((p) => p.tecnicoResponsavelId === tecnicoId);
+  const pedidos = obterPedidos().filter(
+    (p) => p.tecnicoResponsavelId === tecnicoId || !p.tecnicoResponsavelId
+  );
   return atrasoDeRede(pedidos);
 }
 
@@ -119,12 +121,25 @@ export async function deferirPedidoMock(pedidoId) {
   }
 
   const novoEstado = estadoAtual === 'PARECER_FAVORAVEL' ? 'DEFERIDO' : 'INDEFERIDO';
+  const agora = new Date().toISOString();
 
   pedidos[indice] = {
     ...pedidos[indice],
     estado: novoEstado,
-    dataUltimaAtualizacao: new Date().toISOString(),
+    dataUltimaAtualizacao: agora,
   };
+
+  if (novoEstado === 'DEFERIDO') {
+    pedidos[indice].certificado = {
+      numeroCertificado: `REG-IAPI-${new Date().getFullYear()}-${String(pedidos[indice].id).padStart(5, '0')}`,
+      dataConcessao: agora,
+      dataValidade: new Date(Date.now() + 10 * 365.25 * 86400000).toISOString(),
+      orgaoEmissor: 'Instituto Angolano da Propriedade Industrial (IAPI)',
+      directorGeral: 'Dr. Pascoal Comprido',
+      chancela: 'REPÚBLICA DE ANGOLA - IAPI',
+    };
+  }
+
   guardarPedidos(pedidos);
   return atrasoDeRede(pedidos[indice]);
 }
@@ -147,17 +162,74 @@ export async function criarPedidoMock(dadosPedido) {
     documentos: dadosPedido.documentos ?? [],
     requerenteId: dadosPedido.requerenteId,
     requerenteNome: dadosPedido.requerenteNome,
-    estado: 'SUBMETIDO',
+    estado: 'DEPOSITADO',
+    pago: false,
+    referenciaRupe: dadosPedido.referenciaRupe || null,
     dataSubmissao: agora,
     dataUltimaAtualizacao: agora,
     tecnicoResponsavelId: null,
     observacoes: null,
     exigencias: [],
     parecer: null,
+    detalhesMarca: dadosPedido.detalhesMarca ?? null,
+    classesNice: dadosPedido.classesNice ?? [],
+    titular: dadosPedido.titular ?? null,
+    taxas: dadosPedido.taxas ?? null,
+    documentosAnexados: dadosPedido.documentosAnexados ?? [],
+    historicoEstados: [
+      {
+        estado: 'DEPOSITADO',
+        data: agora,
+        observacao: 'Pedido de registo de marca depositado com sucesso no IAPI.',
+        autor: dadosPedido.requerenteNome || 'Requerente',
+      },
+    ],
   };
 
   guardarPedidos([...pedidos, novoPedido]);
   return atrasoDeRede(novoPedido);
+}
+
+/** Avança o estado de um pedido no fluxo oficial do IAPI (usado para simulação e demonstração). */
+export async function avancarFluxoIapiMock(pedidoId, proximoEstado, detalhes = {}) {
+  const pedidos = obterPedidos();
+  const indice = pedidos.findIndex((p) => p.id === Number(pedidoId));
+  if (indice === -1) throw new Error('Pedido não encontrado.');
+
+  const pedido = pedidos[indice];
+  const agora = new Date().toISOString();
+  const historico = pedido.historicoEstados || [];
+
+  const atualizado = {
+    ...pedido,
+    estado: proximoEstado,
+    dataUltimaAtualizacao: agora,
+    ...detalhes,
+    historicoEstados: [
+      ...historico,
+      {
+        estado: proximoEstado,
+        data: agora,
+        observacao: detalhes.observacao || `Transição oficial para ${proximoEstado}.`,
+        autor: detalhes.autor || 'IAPI - Sistema SIPI',
+      },
+    ],
+  };
+
+  if (proximoEstado === 'CONCEDIDO' || proximoEstado === 'DEFERIDO') {
+    atualizado.certificado = {
+      numeroCertificado: `REG-IAPI-${new Date().getFullYear()}-${String(pedido.id).padStart(5, '0')}`,
+      dataConcessao: agora,
+      dataValidade: new Date(Date.now() + 10 * 365.25 * 86400000).toISOString(),
+      orgaoEmissor: 'Instituto Angolano da Propriedade Industrial (IAPI)',
+      directorGeral: 'Dr. Pascoal Comprido',
+      chancela: 'REPÚBLICA DE ANGOLA - IAPI',
+    };
+  }
+
+  pedidos[indice] = atualizado;
+  guardarPedidos(pedidos);
+  return atrasoDeRede(atualizado);
 }
 
 export async function obterPedidoPorIdMock(pedidoId) {

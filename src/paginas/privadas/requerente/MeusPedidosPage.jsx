@@ -1,14 +1,16 @@
 // src/paginas/privadas/requerente/MeusPedidosPage.jsx
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Plus, Pencil, Trash2, X, FileText, Clock, Receipt } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, FileText, Clock, Receipt, Award, Eye } from 'lucide-react';
 import CabecalhoPainel from "../../../components/privado/CabecalhoPainel";
 import { listarPedidosDoRequerente, removerPedido, obterHistorico } from "../../../services/pedidosService";
 import { obterServicoDoTipo } from "../../../services/pagamentosService";
 import { obterInfoEstado, podeEditarOuEliminar, podePagar } from "../../../utilitarios/estadosPedido";
 import { useAutenticacao } from "../../../contexto/AutenticacaoContexto";
 import ModalRupe from "../../../components/pagamentos/ModalRupe";
+import ModalDetalhesPedidoIapi from "../../../components/pedidos/ModalDetalhesPedidoIapi";
+import CertificadoMarcaModal from "../../../components/pedidos/CertificadoMarcaModal";
 import BotaoExportarPdf from "../../../components/common/BotaoExportarPdf";
 import { gerarRelatorioPedidosPdf } from "../../../utilitarios/relatorioPdf";
 import { carregarLogoDataUrl } from "../../../utilitarios/relatorioLogo";
@@ -25,31 +27,14 @@ export default function MeusPedidosPage() {
   const [historico, setHistorico] = useState([]);
 
   const [pedidoParaPagar, setPedidoParaPagar] = useState(null);
+  const [pedidoDossier, setPedidoDossier] = useState(null);
+  const [certificadoParaVer, setCertificadoParaVer] = useState(null);
 
   const [pedidoParaEliminar, setPedidoParaEliminar] = useState(null);
   const [aEliminar, setAEliminar] = useState(false);
   const [erroEliminar, setErroEliminar] = useState(null);
 
-  useEffect(() => {
-    if (!utilizador?.id) return;
-    carregarPedidos();
-  }, [utilizador?.id]);
-
-  function carregarPedidos() {
-    setACarregar(true);
-    listarPedidosDoRequerente(utilizador.id).then((resultado) => {
-      setPedidos(resultado);
-      setACarregar(false);
-      carregarPrecos(resultado);
-    }).catch((erro) => {
-      console.error('Erro ao carregar pedidos:', erro);
-      setACarregar(false);
-    });
-  }
-
-  // Um pedido ao backend por cada tipo distinto de pedido na lista (o backend
-  // guarda o catálogo em cache). Se falhar, a coluna mostra «—».
-  function carregarPrecos(lista) {
+  const carregarPrecos = useCallback((lista) => {
     const tipos = [...new Set(lista.map((p) => p.tipoPropriedade))];
     Promise.all(
       tipos.map((tipo) =>
@@ -61,7 +46,36 @@ export default function MeusPedidosPage() {
           })
       )
     ).then((pares) => setServicos(Object.fromEntries(pares.filter(Boolean))));
-  }
+  }, []);
+
+  const carregarPedidos = () => {
+    if (!utilizador?.id) return;
+    setACarregar(true);
+    listarPedidosDoRequerente(utilizador.id).then((resultado) => {
+      setPedidos(resultado);
+      setACarregar(false);
+      carregarPrecos(resultado);
+    }).catch((erro) => {
+      console.error('Erro ao carregar pedidos:', erro);
+      setACarregar(false);
+    });
+  };
+
+  useEffect(() => {
+    if (!utilizador?.id) return;
+    let cancelado = false;
+    listarPedidosDoRequerente(utilizador.id).then((resultado) => {
+      if (cancelado) return;
+      setPedidos(resultado);
+      setACarregar(false);
+      carregarPrecos(resultado);
+    }).catch((erro) => {
+      if (cancelado) return;
+      console.error('Erro ao carregar pedidos:', erro);
+      setACarregar(false);
+    });
+    return () => { cancelado = true; };
+  }, [utilizador?.id, carregarPrecos]);
 
   function obterTaxaDoPedido(pedido) {
     return servicos[pedido.tipoPropriedade]?.valor ?? null;
@@ -199,8 +213,17 @@ export default function MeusPedidosPage() {
                             indice % 2 === 0 ? 'bg-white' : 'bg-gray-50'
                           }`}
                         >
-                          <td className="py-3 px-5 font-medium text-primary-500">{p.numeroProcesso}</td>
-                          <td className="py-3 px-4 text-gray-700">{p.titulo}</td>
+                          <td className="py-3 px-5 font-medium">
+                            <button
+                              type="button"
+                              onClick={() => setPedidoDossier(p)}
+                              className="text-primary-600 hover:text-primary-800 font-semibold hover:underline text-left"
+                              title="Ver Dossier e Tramitação no IAPI"
+                            >
+                              {p.numeroProcesso}
+                            </button>
+                          </td>
+                          <td className="py-3 px-4 text-gray-700 font-medium">{p.titulo}</td>
                           <td className="py-3 px-4 text-gray-700">{p.tipoPropriedade.replaceAll('_', ' ')}</td>
                           <td className="py-3 px-4 text-gray-700">
                             {p.dataSubmissao
@@ -227,64 +250,71 @@ export default function MeusPedidosPage() {
                             )}
                           </td>
                           <td className="py-3 px-5">
-                            {editavel ? (
-                              <div className="flex items-center justify-end gap-2">
-                                {!p.pago && podePagar(p.estado) && (
+                            <div className="flex items-center justify-end gap-1.5">
+                              {/* Botão de Dossier e Tramitação Oficial do IAPI */}
+                              <button
+                                type="button"
+                                onClick={() => setPedidoDossier(p)}
+                                className="inline-flex items-center gap-1 text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-200 px-2 py-1 rounded"
+                                title="Ver Dossier Oficial e Linha de Tramitação do IAPI"
+                              >
+                                <Eye size={12} />
+                                Tramitação IAPI
+                              </button>
+
+                              {/* Se deferido ou concedido, mostra botão para ver o Certificado Oficial */}
+                              {(p.estado === 'DEFERIDO' || p.estado === 'CONCEDIDO') && (
+                                <button
+                                  type="button"
+                                  onClick={() => setCertificadoParaVer(p)}
+                                  className="inline-flex items-center gap-1 text-xs font-bold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-2 py-1 rounded"
+                                  title="Ver Certificado de Registo de Marca"
+                                >
+                                  <Award size={12} />
+                                  Certificado
+                                </button>
+                              )}
+
+                              {!p.pago && podePagar(p.estado) && (
+                                <button
+                                  type="button"
+                                  onClick={() => setPedidoParaPagar(p)}
+                                  className="inline-flex items-center gap-1 text-xs font-medium text-green-700 hover:text-green-800 px-1.5 py-1"
+                                >
+                                  <Receipt size={13} aria-hidden="true" />
+                                  Pagar (RUPE)
+                                </button>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={() => verHistorico(p.id)}
+                                className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-primary-600 px-1.5 py-1"
+                              >
+                                <Clock size={13} aria-hidden="true" />
+                                Histórico
+                              </button>
+
+                              {editavel && (
+                                <>
+                                  <Link
+                                    to={`/meus-pedidos/${p.id}/editar`}
+                                    className="inline-flex items-center gap-1 text-xs font-medium text-primary-500 hover:text-primary-600 px-1.5 py-1"
+                                  >
+                                    <Pencil size={13} aria-hidden="true" />
+                                    Editar
+                                  </Link>
                                   <button
                                     type="button"
-                                    onClick={() => setPedidoParaPagar(p)}
-                                    className="inline-flex items-center gap-1 text-xs font-medium text-green-700 hover:text-green-800"
+                                    onClick={() => pedirConfirmacaoEliminar(p)}
+                                    className="inline-flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-600 px-1.5 py-1"
                                   >
-                                    <Receipt size={13} aria-hidden="true" />
-                                    Pagar (RUPE)
+                                    <Trash2 size={13} aria-hidden="true" />
+                                    Eliminar
                                   </button>
-                                )}
-                                <button
-                                  type="button"
-                                  onClick={() => verHistorico(p.id)}
-                                  className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-primary-600"
-                                >
-                                  <Clock size={13} aria-hidden="true" />
-                                  Histórico
-                                </button>
-                                <Link
-                                  to={`/meus-pedidos/${p.id}/editar`}
-                                  className="inline-flex items-center gap-1 text-xs font-medium text-primary-500 hover:text-primary-600"
-                                >
-                                  <Pencil size={13} aria-hidden="true" />
-                                  Editar
-                                </Link>
-                                <button
-                                  type="button"
-                                  onClick={() => pedirConfirmacaoEliminar(p)}
-                                  className="inline-flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-600"
-                                >
-                                  <Trash2 size={13} aria-hidden="true" />
-                                  Eliminar
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="flex items-center justify-end gap-2">
-                                {!p.pago && podePagar(p.estado) && (
-                                  <button
-                                    type="button"
-                                    onClick={() => setPedidoParaPagar(p)}
-                                    className="inline-flex items-center gap-1 text-xs font-medium text-green-700 hover:text-green-800"
-                                  >
-                                    <Receipt size={13} aria-hidden="true" />
-                                    Pagar (RUPE)
-                                  </button>
-                                )}
-                                <button
-                                  type="button"
-                                  onClick={() => verHistorico(p.id)}
-                                  className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-primary-600"
-                                >
-                                  <Clock size={13} aria-hidden="true" />
-                                  Histórico
-                                </button>
-                              </div>
-                            )}
+                                </>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
@@ -411,6 +441,26 @@ export default function MeusPedidosPage() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Modal de Dossier e Tramitação Oficial do IAPI */}
+      {pedidoDossier && (
+        <ModalDetalhesPedidoIapi
+          pedidoInicial={pedidoDossier}
+          onFechar={() => setPedidoDossier(null)}
+          onAtualizar={(atualizado) => {
+            setPedidoDossier(atualizado);
+            carregarPedidos();
+          }}
+        />
+      )}
+
+      {/* Modal de Visualização do Certificado de Registo de Marca */}
+      {certificadoParaVer && (
+        <CertificadoMarcaModal
+          pedido={certificadoParaVer}
+          onFechar={() => setCertificadoParaVer(null)}
+        />
       )}
     </div>
   );

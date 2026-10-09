@@ -1,6 +1,6 @@
 // src/paginas/publicas/LoginPage.jsx
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
 import GoogleAuthSection from '../../components/forms/GoogleAuthSection';
@@ -15,7 +15,6 @@ export default function LoginPage() {
 
   const { entrar } = useAutenticacao();
   const navegar = useNavigate();
-  const localizacao = useLocation();
 
   const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -107,6 +106,35 @@ export default function LoginPage() {
             </div>
 
             <GoogleAuthSection texto="signin_with" />
+
+            <div className="pt-2 border-t border-gray-100">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 text-center">
+                Acesso Rápido de Demonstração
+              </p>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setForm({ email: 'requerente@sipi.ao', password: '123456' })}
+                  className="text-xs py-1.5 px-2 bg-gray-50 hover:bg-primary-50 hover:text-primary-600 border border-gray-200 rounded text-gray-700 font-medium transition text-center"
+                >
+                  Requerente
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setForm({ email: 'tecnico@sipi.ao', password: '123456' })}
+                  className="text-xs py-1.5 px-2 bg-gray-50 hover:bg-primary-50 hover:text-primary-600 border border-gray-200 rounded text-gray-700 font-medium transition text-center"
+                >
+                  Técnico
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setForm({ email: 'admin@sipi.ao', password: '123456' })}
+                  className="text-xs py-1.5 px-2 bg-gray-50 hover:bg-primary-50 hover:text-primary-600 border border-gray-200 rounded text-gray-700 font-medium transition text-center"
+                >
+                  Admin
+                </button>
+              </div>
+            </div>
 
             <p className="text-center text-sm text-gray-500">
               Ainda não tem conta?{' '}

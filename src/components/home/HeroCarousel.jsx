@@ -80,16 +80,16 @@ export default function HeroCarousel({ slides }) {
           </p>
           <div className="mt-8 flex flex-wrap gap-4 animate-fadeSlide">
             <Link
-              to="/registro"
-              className="bg-secondary-500 hover:bg-secondary-400 text-primary-500 px-6 py-3 font-semibold transition"
+              to={slide.id === 'marca' ? '/meus-pedidos/novo?tipo=MARCA' : '/registro'}
+              className="bg-secondary-500 hover:bg-secondary-400 text-primary-950 px-6 py-3 font-bold text-sm tracking-wide transition shadow"
             >
-              Iniciar Pedido
+              {slide.id === 'marca' ? 'Registar Marca no IAPI' : 'Iniciar Pedido'}
             </Link>
             <Link
               to="/consulta"
-              className="border border-white/40 hover:border-white text-white px-6 py-3 font-semibold transition"
+              className="border border-white/40 hover:border-white text-white px-6 py-3 font-semibold text-sm transition"
             >
-              Consultar Base
+              Consultar Base (BPI)
             </Link>
           </div>
         </div>

@@ -34,7 +34,7 @@ function carregarGsi() {
 export default function GoogleLoginButton({ onCredential, text = 'signin_with' }) {
   const contentorRef = useRef(null);
   const callbackRef = useRef(onCredential);
-  const [erro, setErro] = useState('');
+  const [erro, setErro] = useState(!GOOGLE_CLIENT_ID ? 'Login com Google não configurado (VITE_GOOGLE_CLIENT_ID em falta).' : '');
 
   // Mantém sempre a versão mais recente do callback sem reinicializar o botão
   useEffect(() => {
@@ -43,7 +43,6 @@ export default function GoogleLoginButton({ onCredential, text = 'signin_with' }
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) {
-      setErro('Login com Google não configurado (VITE_GOOGLE_CLIENT_ID em falta).');
       return;
     }
 
