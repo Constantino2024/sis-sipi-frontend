@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Foco de teclado sempre visível — nunca remover o outline por defeito. */
+  :focus-visible {
+    outline: 2px solid theme('colors.secondary.500');
+    outline-offset: 2px;
+  }
+}
+
+/* Respeita a preferência do sistema por movimento reduzido: imobiliza o
+   carrossel, o marquee de notícias e qualquer transição de longa duração. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120">
+  <defs>
+    <style>
+      .bg { fill: #0A2A44; }
+      .text-primary { fill: #FFCD00; font-family: 'Inter', sans-serif; font-weight: 900; }
+      .text-secondary { fill: #FFFFFF; font-family: 'Inter', sans-serif; font-weight: 500; }
+      .text-underline { fill: #C8102E; }
+    </style>
+  </defs>
+
+  <!-- Fundo (opcional – pode ser removido se quiser transparente) -->
+  <rect class="bg" width="400" height="120" rx="8" />
+
+  <!-- Elemento gráfico (linha ou padrão) -->
+  <rect x="0" y="0" width="120" height="120" fill="#C8102E" rx="8" />
+  <path d="M20 60 L100 60" stroke="#FFCD00" stroke-width="6" />
+  <path d="M60 20 L60 100" stroke="#FFCD00" stroke-width="6" />
+
+  <!-- Símbolo da estrela (bandeira de Angola) -->
+  <path d="M60 30 L66 46 L84 46 L70 56 L76 72 L60 62 L44 72 L50 56 L36 46 L54 46 Z" fill="#FFCD00" />
+
+  <!-- Texto IAPI -->
+  <text x="140" y="50" class="text-primary" font-size="36">IAPI</text>
+  <text x="140" y="80" class="text-secondary" font-size="16">Instituto Angolano da</text>
+  <text x="140" y="100" class="text-secondary" font-size="16">Propriedade Industrial</text>
+
+  <!-- Linha decorativa -->
+  <rect x="140" y="65" width="240" height="2" class="text-underline" rx="1" />
+</svg>
