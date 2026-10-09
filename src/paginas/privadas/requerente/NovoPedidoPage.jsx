@@ -21,12 +21,12 @@ import CabecalhoPainel from '../../../components/privado/CabecalhoPainel';
 import { criarPedido } from '../../../services/pedidosService';
 import { uploadAnexo } from '../../../services/anexosService';
 import { listarClassificacoes } from '../../../services/classificacoesService';
+import { obterServicoDoTipo, mensagemDeErro } from '../../../services/pagamentosService';
 import { useAutenticacao } from '../../../contexto/AutenticacaoContexto';
 import ModalRupe from '../../../components/pagamentos/ModalRupe';
 import {
   CLASSES_NICE,
   PROVINCIAS_ANGOLA,
-  calcularTaxaMarcaIapi,
 } from '../../../data/classificacoesNice';
 
 const NATUREZAS_MARCA = [
@@ -156,13 +156,43 @@ export default function NovoPedidoPage() {
   const [erro, setErro] = useState(null);
   const [pedidoCriado, setPedidoCriado] = useState(null);
 
-  // Cálculos de Emolumentos Oficiais do IAPI
-  const taxasCalculadas = useMemo(() => {
-    return calcularTaxaMarcaIapi({
-      numeroClasses: classesSelecionadas.length,
-      reivindicaPrioridade,
-    });
-  }, [classesSelecionadas.length, reivindicaPrioridade]);
+  // Serviço (nome, emolumentos e valor) cobrado pelo depósito de uma marca.
+  // Vem do back-end, que o lê do catálogo da API de pagamento: é o mesmo
+  // valor que ficará na RUPE.
+  const [servicoMarca, setServicoMarca] = useState(null);
+  const [aCarregarServico, setACarregarServico] = useState(true);
+  const [erroServico, setErroServico] = useState(null);
+  const [tentativaServico, setTentativaServico] = useState(0);
+
+  useEffect(() => {
+    let cancelado = false;
+    setACarregarServico(true);
+    setErroServico(null);
+    obterServicoDoTipo(tipoPropriedade)
+      .then((servico) => {
+        if (!cancelado) setServicoMarca(servico);
+      })
+      .catch((excecao) => {
+        if (!cancelado) setErroServico(mensagemDeErro(excecao));
+      })
+      .finally(() => {
+        if (!cancelado) setACarregarServico(false);
+      });
+    return () => {
+      cancelado = true;
+    };
+  }, [tentativaServico]);
+
+  function formatarKz(valor) {
+    return `${Number(valor).toLocaleString('pt-PT', { minimumFractionDigits: 2 })} Kz`;
+  }
+
+  // Texto do valor a pagar: o valor real, ou o estado da consulta.
+  const textoValorServico = servicoMarca
+    ? formatarKz(servicoMarca.valor)
+    : aCarregarServico
+    ? 'A carregar…'
+    : 'Indisponível';
 
   // Classes de Nice filtradas
   const classesFiltradas = useMemo(() => {
@@ -356,7 +386,6 @@ export default function NovoPedidoPage() {
         detalhesMarca,
         classesNice: classesMontadas,
         titular,
-        taxas: taxasCalculadas,
         documentosAnexados: documentos.map((d) => ({
           nome: d.name,
           tamanho: d.size,
@@ -421,7 +450,7 @@ export default function NovoPedidoPage() {
             <div className="bg-primary-800/80 border border-primary-700/60 p-3.5 rounded text-right shrink-0">
               <span className="text-[11px] text-primary-300 block">Taxa Oficial de Depósito</span>
               <strong className="text-lg font-mono text-secondary-400">
-                {taxasCalculadas.total.toLocaleString('pt-PT', { minimumFractionDigits: 2 })} Kz
+                {textoValorServico}
               </strong>
               <span className="text-[10px] text-primary-400 block mt-0.5">
                 {classesSelecionadas.length} classe(s) de Nice incluída(s)
@@ -1317,29 +1346,40 @@ export default function NovoPedidoPage() {
                   <span className="text-xs font-mono text-secondary-400 font-bold">Guia RUPE</span>
                 </div>
                 <div className="p-4 space-y-2 text-xs divide-y divide-gray-100">
-                  <div className="flex justify-between py-1">
-                    <span>Taxa de Depósito de Marca (1.ª Classe de Nice)</span>
-                    <span className="font-mono font-medium">25.000,00 Kz</span>
-                  </div>
-                  {taxasCalculadas.classesAdicionais > 0 && (
-                    <div className="flex justify-between py-1 text-gray-700">
-                      <span>Classes Suplementares ({classesSelecionadas.length - 1} × 10.000,00 Kz)</span>
-                      <span className="font-mono font-medium">
-                        {taxasCalculadas.classesAdicionais.toLocaleString('pt-PT', { minimumFractionDigits: 2 })} Kz
-                      </span>
+                  {aCarregarServico && (
+                    <div className="flex items-center gap-2 py-1 text-gray-500">
+                      <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                      A consultar o valor do serviço junto do sistema de pagamento…
                     </div>
                   )}
-                  {taxasCalculadas.prioridade > 0 && (
-                    <div className="flex justify-between py-1 text-gray-700">
-                      <span>Taxa de Reivindicação de Prioridade Internacional (CUP)</span>
-                      <span className="font-mono font-medium">15.000,00 Kz</span>
+                  {erroServico && (
+                    <div className="py-1 text-red-700 space-y-1.5" role="alert">
+                      <p>{erroServico}</p>
+                      <button
+                        type="button"
+                        onClick={() => setTentativaServico((t) => t + 1)}
+                        className="font-semibold underline hover:text-red-900"
+                      >
+                        Tentar novamente
+                      </button>
                     </div>
+                  )}
+                  {servicoMarca && (
+                    <>
+                      {servicoMarca.nome && (
+                        <div className="py-1 text-gray-500">{servicoMarca.nome}</div>
+                      )}
+                      {servicoMarca.emolumentos.map((emolumento, indice) => (
+                        <div key={`${emolumento.nome}-${indice}`} className="flex justify-between py-1 text-gray-700">
+                          <span>{emolumento.nome}</span>
+                          <span className="font-mono font-medium">{formatarKz(emolumento.valor)}</span>
+                        </div>
+                      ))}
+                    </>
                   )}
                   <div className="flex justify-between pt-3 text-sm font-bold text-primary-900">
                     <span>Total a Pagar por RUPE</span>
-                    <span className="font-mono text-base text-secondary-600">
-                      {taxasCalculadas.total.toLocaleString('pt-PT', { minimumFractionDigits: 2 })} Kz
-                    </span>
+                    <span className="font-mono text-base text-secondary-600">{textoValorServico}</span>
                   </div>
                 </div>
               </div>
